@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./order-service
-          file: ./order-service/Dockerfile
+          file: ./order-service/Containerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/order-service:latest
 
@@ -45,7 +45,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./kitchen-service
-          file: ./kitchen-service/Dockerfile
+          file: ./kitchen-service/Containerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/kitchen-service:latest
 
@@ -53,7 +53,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./accounting-service
-          file: ./accounting-service/Dockerfile
+          file: ./accounting-service/Containerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/accounting-service:latest
 
@@ -61,6 +61,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./order-orchestrator
-          file: ./order-orchestrator/Dockerfile
+          file: ./order-orchestrator/Containerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/order-orchestrator:latest
