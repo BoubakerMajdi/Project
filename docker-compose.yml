@@ -1,0 +1,135 @@
+services:
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Containerfile
+    ports:
+      - "50051:50051"
+    environment:
+      DB_URL: jdbc:postgresql://order-db:5432/orderdb
+      DB_USER: postgres
+      DB_PASS: postgres
+    networks:
+      - services-network
+    depends_on:
+      - order-db
+
+  kitchen-service:
+    build:
+      context: ./kitchen-service
+      dockerfile: Containerfile
+    ports:
+      - "50052:50052"
+    environment:
+      DB_URL: jdbc:postgresql://kitchen-db:5432/kitchendb
+      DB_USER: postgres
+      DB_PASS: postgres
+    networks:
+      - services-network
+    depends_on:
+      - kitchen-db
+
+  account-service:
+    build:
+      context: ./accounting-service
+      dockerfile: Containerfile
+    ports:
+      - "50055:50053"
+    environment:
+      DB_URL: jdbc:postgresql://account-db:5432/accountdb
+      DB_USER: postgres
+      DB_PASS: postgres
+    networks:
+      - services-network
+    depends_on:
+      - account-db
+
+  orchestrator:
+    build:
+      context: ./order-orchestrator
+      dockerfile: Containerfile
+    ports:
+      - "8080:8080"
+    environment:
+      ORDER_SERVICE_HOST: order-service
+      ORDER_SERVICE_PORT: 50051
+
+      KITCHEN_SERVICE_HOST: kitchen-service
+      KITCHEN_SERVICE_PORT: 50052
+
+      ACCOUNTING_SERVICE_HOST: account-service
+      ACCOUNTING_SERVICE_PORT: 50053
+    networks:
+      - services-network
+      - frontend-network
+    depends_on:
+      - order-service
+      - kitchen-service
+      - account-service
+
+  order-db:
+    image: postgres:15
+    container_name: order-db
+    environment:
+      POSTGRES_DB: orderdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+    networks:
+      - services-network
+
+  kitchen-db:
+    image: postgres:15
+    container_name: kitchen-db
+    environment:
+      POSTGRES_DB: kitchendb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - kitchen-db-data:/var/lib/postgresql/data
+    networks:
+      - services-network
+
+  account-db:
+    image: postgres:15
+    container_name: account-db
+    environment:
+      POSTGRES_DB: accountdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - account-db-data:/var/lib/postgresql/data
+      - ./accounting-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - services-network
+
+  frontend:
+    image: nginx:alpine
+    container_name: frontend
+    ports:
+      - "8081:80"
+    volumes:
+      - ./ui:/usr/share/nginx/html:ro
+    networks:
+      - frontend-network
+    depends_on:
+      - orchestrator
+
+networks:
+  services-network:
+    driver: bridge
+
+  frontend-network:
+    driver: bridge
+
+volumes:
+  order-db-data:
+  kitchen-db-data:
+  account-db-data:

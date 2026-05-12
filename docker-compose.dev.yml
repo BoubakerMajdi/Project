@@ -1,0 +1,88 @@
+services:
+  order-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: orders_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+
+  kitchen-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: kitchen_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - kitchen-db-data:/var/lib/postgresql/data
+
+  accounting-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: accounting_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - accounting-db-data:/var/lib/postgresql/data
+
+  order-service:
+    build: ./order-service
+    depends_on:
+      - order-db
+    environment:
+      DB_HOST: order-db
+      DB_PORT: 5432
+      DB_NAME: orders_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - 50051:50051
+
+  kitchen-service:
+    build: ./kitchen-service
+    depends_on:
+      - kitchen-db
+    environment:
+      DB_HOST: kitchen-db
+      DB_PORT: 5432
+      DB_NAME: kitchen_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - 50052:50052
+
+  accounting-service:
+    build: ./accounting-service
+    depends_on:
+      - accounting-db
+    environment:
+      DB_HOST: accounting-db
+      DB_PORT: 5432
+      DB_NAME: accounting_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - 50053:50053
+
+  order-orchestrator:
+    build: ./order-orchestrator
+    depends_on:
+      - order-service
+      - kitchen-service
+      - accounting-service
+    environment:
+      ORDER_SERVICE_HOST: order-service
+      ORDER_SERVICE_PORT: 50051
+      KITCHEN_SERVICE_HOST: kitchen-service
+      KITCHEN_SERVICE_PORT: 50052
+      ACCOUNTING_SERVICE_HOST: accounting-service
+      ACCOUNTING_SERVICE_PORT: 50053
+    ports:
+      - 8080:8080
+      - 50054:50054
+
+volumes:
+  order-db-data:
+  kitchen-db-data:
+  accounting-db-data:

@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EMBER — Supper Club</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Fira+Sans+Condensed:wght@300;400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #1a1612;
+    --surface: #231f1a;
+    --card: #2b2520;
+    --ink: #f0e6d3;
+    --muted: #9a8878;
+    --accent: #c8602a;
+    --accent2: #e8a87c;
+    --gold: #d4a853;
+    --border: #3a3028;
+    --danger: #c0392b;
+    --success: #5a8a4a;
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    --glow: 0 0 40px rgba(200,96,42,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Fira Sans Condensed', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 1;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 1rem 3rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    grid-column: 2;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .logo-sub {
+    display: block;
+    font-family: 'Fira Sans Condensed', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+
+  nav {
+    display: flex;
+    gap: 2rem;
+    justify-content: flex-start;
+  }
+
+  nav a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    font-weight: 400;
+  }
+
+  nav a:hover { color: var(--ink); }
+
+  .header-right {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .cart-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    padding: 0.55rem 1.2rem;
+    font-family: 'Fira Sans Condensed', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .cart-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent2);
+  }
+
+  .cart-count {
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 1.3rem;
+    height: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    margin-top: 5.5rem;
+    padding: 5rem 3rem 4rem;
+    display: grid;
+    grid-template-columns: 5fr 4fr;
+    gap: 5rem;
+    align-items: center;
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 40%;
+    height: 100%;
+    background: radial-gradient(ellipse at right center, rgba(200,96,42,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-kicker {
+    font-size: 0.68rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .hero-kicker::before {
+    content: '';
+    display: block;
+    width: 2.5rem;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 6vw, 5.5rem);
+    font-weight: 400;
+    line-height: 1.05;
+    margin-bottom: 2rem;
+    color: var(--ink);
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent2);
+  }
+
+  .hero-sub {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    max-width: 400px;
+    font-weight: 300;
+    border-left: 2px solid var(--border);
+    padding-left: 1.2rem;
+  }
+
+  .hero-visual {
+    position: relative;
+    height: 420px;
+  }
+
+  .hero-frame {
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .hero-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 40% 50%, rgba(200,96,42,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(212,168,83,0.06) 0%, transparent 50%);
+  }
+
+  .hero-frame-corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-color: var(--gold);
+    border-style: solid;
+    opacity: 0.6;
+  }
+
+  .hero-frame-corner.tl { top: 12px; left: 12px; border-width: 1px 0 0 1px; }
+  .hero-frame-corner.tr { top: 12px; right: 12px; border-width: 1px 1px 0 0; }
+  .hero-frame-corner.bl { bottom: 12px; left: 12px; border-width: 0 0 1px 1px; }
+  .hero-frame-corner.br { bottom: 12px; right: 12px; border-width: 0 1px 1px 0; }
+
+  .hero-plate {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 7rem;
+    animation: float 5s ease-in-out infinite;
+    filter: drop-shadow(0 8px 20px rgba(200,96,42,0.3));
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+    50% { transform: translate(-50%, -50%) translateY(-18px); }
+  }
+
+  .hero-tagline {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0 3rem;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+  .divider-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--gold);
+    opacity: 0.7;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    text-align: center;
+    padding: 3.5rem 3rem 2.5rem;
+  }
+
+  .section-kicker {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.15;
+  }
+
+  /* ── MENU ── */
+  #menu {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 3rem 7rem;
+  }
+
+  .menu-categories {
+    display: flex;
+    gap: 0;
+    justify-content: center;
+    margin-bottom: 3rem;
+    border: 1px solid var(--border);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+  }
+
+  .cat-btn {
+    border: none;
+    border-right: 1px solid var(--border);
+    background: transparent;
+    padding: 0.7rem 1.6rem;
+    font-family: 'Fira Sans Condensed', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+    white-space: nowrap;
+    font-weight: 400;
+  }
+
+  .cat-btn:last-child { border-right: none; }
+
+  .cat-btn:hover { color: var(--ink); background: var(--surface); }
+
+  .cat-btn.active {
+    background: var(--accent);
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .menu-card {
+    background: var(--card);
+    padding: 0;
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    align-items: stretch;
+    transition: background 0.2s;
+    opacity: 0;
+    animation: cardIn 0.35s ease forwards;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    min-height: 110px;
+  }
+
+  .menu-card:last-child { border-bottom: none; }
+  .menu-card:hover { background: var(--surface); }
+
+  @keyframes cardIn {
+    to { opacity: 1; }
+  }
+
+  /* Left icon panel */
+  .card-icon-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 1rem;
+    position: relative;
+    background: rgba(0,0,0,0.15);
+  }
+
+  .card-svg-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+  }
+
+  /* Middle content */
+  .card-content {
+    padding: 1.4rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.1rem;
+  }
+
+  .card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .card-tag {
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(212,168,83,0.3);
+    padding: 0.2rem 0.5rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .card-desc {
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.5;
+    font-weight: 300;
+    max-width: 520px;
+  }
+
+  /* Right action panel */
+  .card-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 1.4rem 1.8rem;
+    border-left: 1px solid var(--border);
+    min-width: 160px;
+  }
+
+  .card-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--accent2);
+    font-weight: 400;
+  }
+
+  .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .qty-btn {
+    background: transparent;
+    border: none;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+    font-family: 'Fira Sans Condensed', sans-serif;
+  }
+
+  .qty-btn:hover { background: var(--accent); color: white; }
+
+  .qty-display {
+    font-weight: 600;
+    min-width: 2rem;
+    text-align: center;
+    color: var(--ink);
+    font-size: 0.85rem;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .add-btn {
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    padding: 0.4rem 0;
+    width: 100%;
+    font-family: 'Fira Sans Condensed', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .add-btn:hover { background: var(--accent); color: white; }
+
+  .add-btn.added {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+
+  /* ── CART DRAWER ── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .overlay.open { opacity: 1; pointer-events: all; }
+
+  .drawer {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 440px;
+    max-width: 100vw;
+    background: var(--surface);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border);
+  }
+
+  .drawer.open { transform: translateX(0); }
+
+  .drawer-header {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .drawer-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+  }
+
+  .close-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .drawer-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .cart-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cart-item:last-child { border-bottom: none; }
+
+  .cart-item-icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cart-item-icon .card-svg-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cart-item-info { flex: 1; }
+
+  .cart-item-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--ink);
+  }
+
+  .cart-item-price {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
+  }
+
+  .cart-item-remove {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+    width: 1.8rem;
+    height: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cart-item-remove:hover { border-color: var(--danger); color: var(--danger); }
+
+  .empty-cart {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 4rem 0;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+  }
+
+  .empty-cart-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.4; }
+
+  .drawer-footer {
+    padding: 1.5rem 2rem 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .total-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .total-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--accent2);
+    font-weight: 400;
+  }
+
+  .customer-input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .customer-input-row label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .customer-input-row input {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 0.8rem 1rem;
+    font-family: 'Fira Sans Condensed', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    color: var(--ink);
+  }
+
+  .customer-input-row input:focus { border-color: var(--accent); }
+  .customer-input-row input::placeholder { color: var(--muted); }
+
+  .order-btn {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 1rem;
+    font-family: 'Fira Sans Condensed', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .order-btn:hover:not(:disabled) { background: #b85525; }
+  .order-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 3rem;
+    width: 460px;
+    max-width: 90vw;
+    transform: translateY(20px);
+    transition: transform 0.3s;
+    position: relative;
+  }
+
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 0.4rem;
+    color: var(--ink);
+  }
+
+  .modal-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 1.8rem;
+    line-height: 1.6;
+  }
+
+  .modal-summary {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+    font-size: 0.82rem;
+    line-height: 2;
+  }
+
+  .modal-summary strong {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  .modal-actions { display: flex; gap: 0.8rem; }
+
+  .btn-confirm {
+    flex: 1;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.9rem;
+    font-family: 'Fira Sans Condensed', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-confirm:hover { background: #b85525; }
+
+  .btn-cancel-order {
+    flex: 1;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 0.9rem;
+    font-family: 'Fira Sans Condensed', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-cancel-order:hover { border-color: var(--muted); color: var(--ink); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--card);
+    color: var(--ink);
+    padding: 0.9rem 1.8rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    z-index: 400;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    white-space: nowrap;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+  }
+
+  .toast.success { border-left-color: var(--success); }
+  .toast.error   { border-left-color: var(--danger); }
+  .toast.show    { transform: translateX(-50%) translateY(0); }
+
+  /* ── SPINNER ── */
+  .spinner {
+    display: inline-block;
+    width: 13px; height: 13px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    header { padding: 1rem 1.5rem; grid-template-columns: 1fr auto 1fr; }
+    nav { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 2.5rem 1.5rem 2rem; gap: 2.5rem; margin-top: 5rem; }
+    .hero-visual { height: 260px; }
+    #menu { padding: 0 1.5rem 4rem; }
+    .section-header { padding: 2.5rem 1.5rem 1.5rem; }
+    .menu-card { grid-template-columns: 72px 1fr; }
+    .card-footer { display: none; }
+    .card-content { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <nav>
+    <a href="#menu">Menu</a>
+    <a href="#menu">About</a>
+    <a href="#menu">Reserve</a>
+  </nav>
+  <div class="logo">
+    EMBER
+    <span class="logo-sub">Supper Club</span>
+  </div>
+  <div class="header-right">
+    <button class="cart-btn" onclick="openCart()">
+      View Order &nbsp;<span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <p class="hero-kicker">Est. 2024 · Fire-driven cuisine</p>
+    <h1 class="hero-title">Where every<br/>meal is an<br/><em>occasion</em></h1>
+    <p class="hero-sub">Carefully sourced. Thoughtfully composed. Each dish tells the story of the season — order ahead and let the kitchen prepare something worth remembering.</p>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-frame">
+      <div class="hero-frame-corner tl"></div>
+      <div class="hero-frame-corner tr"></div>
+      <div class="hero-frame-corner bl"></div>
+      <div class="hero-frame-corner br"></div>
+      <div class="hero-plate">🔥</div>
+      <div class="hero-tagline">Nightly from 6pm</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider">
+  <div class="divider-line"></div>
+  <div class="divider-mark">✦</div>
+  <div class="divider-line"></div>
+</div>
+
+<!-- MENU -->
+<section>
+  <div class="section-header">
+    <p class="section-kicker">Tonight's Selection</p>
+    <h2 class="section-title">The Menu</h2>
+  </div>
+  <div id="menu">
+    <div class="menu-categories">
+      <button class="cat-btn active" onclick="filterMenu('all', this)">All</button>
+      <button class="cat-btn" onclick="filterMenu('starters', this)">Starters</button>
+      <button class="cat-btn" onclick="filterMenu('mains', this)">Mains</button>
+      <button class="cat-btn" onclick="filterMenu('desserts', this)">Desserts</button>
+      <button class="cat-btn" onclick="filterMenu('drinks', this)">Drinks</button>
+    </div>
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+</section>
+
+<!-- CART DRAWER -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h2 class="drawer-title">Your Order</h2>
+    <button class="close-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="drawer-items" id="drawerItems"></div>
+  <div class="drawer-footer">
+    <div class="total-row">
+      <span class="total-label">Total</span>
+      <span class="total-amount" id="totalAmount">$0.00</span>
+    </div>
+    <div class="customer-input-row">
+      <label for="customerId">Customer ID</label>
+      <input type="text" id="customerId" placeholder="e.g. customer-1"/>
+    </div>
+    <button class="order-btn" id="placeOrderBtn" onclick="placeOrder()">Place Order</button>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 class="modal-title">Confirm Order</h3>
+    <p class="modal-sub">Review your selection before we pass it to the kitchen.</p>
+    <div class="modal-summary" id="modalSummary"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm" id="btnConfirm" onclick="confirmOrder()">Confirm</button>
+      <button class="btn-cancel-order" onclick="cancelOrder()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://localhost:8080';
+
+  // SVG icons for each menu item — unique hand-drawn style line art
+  const ICONS = {
+    burrata: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="26" cy="26" r="16" stroke="#e8a87c" stroke-width="1.5" fill="none"/>
+      <circle cx="26" cy="26" r="9" stroke="#d4a853" stroke-width="1" fill="none" stroke-dasharray="2 2"/>
+      <ellipse cx="20" cy="20" rx="4" ry="3" stroke="#e8a87c" stroke-width="1" fill="none"/>
+      <ellipse cx="32" cy="30" rx="5" ry="3.5" stroke="#e8a87c" stroke-width="1" fill="none"/>
+      <path d="M18 30 Q22 34 28 32" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M30 18 Q34 22 32 26" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+    </svg>`,
+    tuna: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 28 Q14 18 28 20 Q38 22 44 28 Q38 34 28 32 Q14 34 8 28Z" stroke="#e8a87c" stroke-width="1.5" fill="none"/>
+      <circle cx="38" cy="26" r="2" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <path d="M44 22 L48 18 M44 28 L48 28 M44 34 L48 38" stroke="#9a8878" stroke-width="1" stroke-linecap="round"/>
+      <path d="M14 26 Q20 22 26 26 Q20 30 14 26Z" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <circle cx="22" cy="34" r="3" stroke="#e8a87c" stroke-width="1" fill="none"/>
+      <circle cx="30" cy="36" r="2" stroke="#e8a87c" stroke-width="1" fill="none"/>
+    </svg>`,
+    mushroom: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 30 Q12 18 26 14 Q40 18 38 30Z" stroke="#e8a87c" stroke-width="1.5" fill="none"/>
+      <path d="M20 30 L20 40 Q26 43 32 40 L32 30" stroke="#e8a87c" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <circle cx="21" cy="23" r="2" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <circle cx="30" cy="20" r="1.5" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <circle cx="33" cy="26" r="2" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <path d="M22 35 Q26 37 30 35" stroke="#9a8878" stroke-width="1" stroke-linecap="round"/>
+    </svg>`,
+    seabass: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 26 Q10 16 26 18 Q38 16 46 26 Q38 36 26 34 Q10 36 6 26Z" stroke="#e8a87c" stroke-width="1.5" fill="none"/>
+      <circle cx="40" cy="24" r="2" stroke="#d4a853" stroke-width="1.2" fill="none"/>
+      <path d="M6 22 L2 16 M6 26 L2 26 M6 30 L2 36" stroke="#9a8878" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M16 22 Q22 18 28 22" stroke="#d4a853" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M16 26 Q22 24 30 26" stroke="#d4a853" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M16 30 Q22 32 28 30" stroke="#d4a853" stroke-width="1" stroke-linecap="round" fill="none"/>
+    </svg>`,
+    duck: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="26" cy="30" rx="14" ry="10" stroke="#e8a87c" stroke-width="1.5" fill="none"/>
+      <path d="M16 28 Q20 14 30 16 Q36 18 34 28" stroke="#e8a87c" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M18 38 L16 44 M26 40 L26 44 M34 38 L36 44" stroke="#9a8878" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M20 24 Q26 20 32 24" stroke="#d4a853" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <circle cx="32" cy="18" r="2" stroke="#d4a853" stroke-width="1" fill="none"/>
+    </svg>`,
+    risotto: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 30 Q10 42 26 42 Q42 42 42 30 L38 22 Q32 18 26 18 Q20 18 14 22Z" stroke="#e8a87c" stroke-width="1.5" fill="none"/>
+      <ellipse cx="26" cy="22" rx="12" ry="5" stroke="#e8a87c" stroke-width="1.2" fill="none"/>
+      <circle cx="20" cy="28" r="1.5" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <circle cx="26" cy="26" r="1.5" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <circle cx="32" cy="28" r="1.5" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <circle cx="23" cy="34" r="1.5" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <circle cx="29" cy="34" r="1.5" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <path d="M22 14 Q24 10 26 14 Q28 10 30 14" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+    </svg>`,
+    wagyu: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 34 Q8 26 16 22 Q24 16 36 20 Q44 24 44 32 Q44 40 32 42 Q14 44 10 34Z" stroke="#e8a87c" stroke-width="1.5" fill="none"/>
+      <path d="M16 30 Q20 26 26 28 Q30 30 28 34" stroke="#d4a853" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M28 24 Q34 22 36 28" stroke="#d4a853" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M12 38 Q16 42 22 40" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M32 36 Q38 38 40 34" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+    </svg>`,
+    fondant: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="14" y="20" width="24" height="22" rx="3" stroke="#e8a87c" stroke-width="1.5" fill="none"/>
+      <path d="M18 20 Q26 10 34 20" stroke="#d4a853" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <circle cx="26" cy="31" r="5" stroke="#d4a853" stroke-width="1.2" fill="none"/>
+      <path d="M26 26 L26 22" stroke="#9a8878" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M14 28 Q10 31 14 34" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M38 28 Q42 31 38 34" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+    </svg>`,
+    tart: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 36 L18 18 L34 18 L42 36Z" stroke="#e8a87c" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      <path d="M14 36 Q26 28 38 36" stroke="#d4a853" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      <ellipse cx="26" cy="18" rx="8" ry="4" stroke="#e8a87c" stroke-width="1.2" fill="none"/>
+      <path d="M20 26 Q26 22 32 26" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M22 31 Q26 27 30 31" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+    </svg>`,
+    sorbet: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 26 Q16 16 26 14 Q36 16 36 26 L30 44 L22 44Z" stroke="#e8a87c" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      <path d="M16 26 Q21 30 26 26 Q31 22 36 26" stroke="#d4a853" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      <circle cx="22" cy="20" r="2.5" stroke="#e8a87c" stroke-width="1" fill="none"/>
+      <circle cx="30" cy="18" r="2" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <path d="M22 44 Q26 47 30 44" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+    </svg>`,
+    wine: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 10 L18 22 Q14 30 16 36 Q18 42 26 42 Q34 42 36 36 Q38 30 34 22 L34 10Z" stroke="#e8a87c" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <line x1="18" y1="10" x2="34" y2="10" stroke="#e8a87c" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M15 30 Q18 26 22 28 Q26 30 24 34" stroke="#d4a853" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <line x1="26" y1="42" x2="26" y2="46" stroke="#9a8878" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="20" y1="46" x2="32" y2="46" stroke="#9a8878" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>`,
+    water: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 8 L18 44 Q18 46 22 46 L30 46 Q34 46 34 44 L34 8Z" stroke="#e8a87c" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M18 8 Q22 6 26 8 Q30 10 34 8" stroke="#e8a87c" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <path d="M20 18 Q26 14 32 18" stroke="#d4a853" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <circle cx="24" cy="28" r="2" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <circle cx="28" cy="34" r="1.5" stroke="#d4a853" stroke-width="1" fill="none"/>
+      <circle cx="22" cy="36" r="1" stroke="#9a8878" stroke-width="1" fill="none"/>
+    </svg>`,
+    lemonade: `<svg class="card-svg-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 16 L16 44 Q16 46 20 46 L32 46 Q36 46 36 44 L38 16Z" stroke="#e8a87c" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      <line x1="12" y1="16" x2="40" y2="16" stroke="#e8a87c" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="26" cy="30" r="5" stroke="#d4a853" stroke-width="1.2" fill="none"/>
+      <path d="M23 30 L29 30 M26 27 L26 33" stroke="#d4a853" stroke-width="1" stroke-linecap="round"/>
+      <path d="M30 8 Q34 4 30 8" stroke="#9a8878" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <line x1="30" y1="8" x2="30" y2="16" stroke="#9a8878" stroke-width="1" stroke-linecap="round"/>
+    </svg>`,
+  };
+
+  const ICON_KEYS = ['burrata','tuna','mushroom','seabass','duck','risotto','wagyu','fondant','tart','sorbet','wine','water','lemonade'];
+
+  const MENU_ITEMS = [
+    { id: 1,  name: 'Burrata & Heirloom',   iconKey: 'burrata',   desc: 'Creamy burrata with heirloom tomatoes, basil oil, and fleur de sel.',                   price: 14.00, category: 'starters', tag: 'Vegetarian' },
+    { id: 2,  name: 'Tuna Tartare',          iconKey: 'tuna',      desc: 'Hand-cut yellowfin tuna, avocado, sesame, and crispy wonton.',                           price: 18.00, category: 'starters', tag: 'Raw' },
+    { id: 3,  name: 'Mushroom Velouté',      iconKey: 'mushroom',  desc: 'Silky wild mushroom soup, truffle cream, toasted sourdough.',                            price: 12.00, category: 'starters', tag: 'Vegetarian' },
+    { id: 4,  name: 'Grilled Sea Bass',      iconKey: 'seabass',   desc: 'Line-caught sea bass, fennel purée, caperberry salsa verde.',                            price: 32.00, category: 'mains',    tag: "Chef's Pick" },
+    { id: 5,  name: 'Duck Confit',           iconKey: 'duck',      desc: '12-hour confit duck leg, Puy lentils, pickled cherry reduction.',                        price: 29.00, category: 'mains',    tag: 'Slow Cooked' },
+    { id: 6,  name: 'Truffle Risotto',       iconKey: 'risotto',   desc: 'Carnaroli rice, aged Parmigiano, black truffle, chives.',                                price: 26.00, category: 'mains',    tag: 'Vegetarian' },
+    { id: 7,  name: 'Wagyu Flat Iron',       iconKey: 'wagyu',     desc: '200g wagyu flat iron, bone marrow butter, roasted shallots.',                            price: 44.00, category: 'mains',    tag: 'Premium' },
+    { id: 8,  name: 'Chocolate Fondant',     iconKey: 'fondant',   desc: 'Warm Valrhona fondant, salted caramel, vanilla bean ice cream.',                         price: 11.00, category: 'desserts', tag: 'Signature' },
+    { id: 9,  name: 'Lemon Tart',            iconKey: 'tart',      desc: 'Brûléed lemon curd, Italian meringue, candied zest.',                                    price: 9.00,  category: 'desserts', tag: 'Classic' },
+    { id: 10, name: 'Seasonal Sorbet',       iconKey: 'sorbet',    desc: 'Three scoops of seasonal sorbet, fresh mint.',                                           price: 8.00,  category: 'desserts', tag: 'Vegan' },
+    { id: 11, name: 'Natural Wine',          iconKey: 'wine',      desc: 'Rotating selection of small-producer natural wines. Ask your server.',                    price: 12.00, category: 'drinks',   tag: 'Alcohol' },
+    { id: 12, name: 'Sparkling Water',       iconKey: 'water',     desc: 'San Pellegrino 750ml.',                                                                   price: 4.00,  category: 'drinks',   tag: 'Non-Alc' },
+    { id: 13, name: 'House Lemonade',        iconKey: 'lemonade',  desc: 'Fresh-pressed lemon, elderflower, mint, still water.',                                    price: 6.00,  category: 'drinks',   tag: 'Non-Alc' },
+  ];
+
+  let cart = [];
+  let currentOrderId = null;
+  let currentCategory = 'all';
+  let quantities = {};
+
+  function renderMenu(category) {
+    const grid = document.getElementById('menuGrid');
+    const items = category === 'all' ? MENU_ITEMS : MENU_ITEMS.filter(i => i.category === category);
+    grid.innerHTML = items.map((item, idx) => {
+      const qty = quantities[item.id] || 1;
+      const inCart = cart.some(c => c.id === item.id);
+      return `
+      <div class="menu-card" style="animation-delay:${idx * 0.04}s">
+        <div class="card-icon-panel">
+          ${ICONS[item.iconKey]}
+        </div>
+        <div class="card-content">
+          <div class="card-top">
+            <div class="card-name">${item.name}</div>
+            <span class="card-tag">${item.tag}</span>
+          </div>
+          <div class="card-desc">${item.desc}</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-price">$${item.price.toFixed(2)}</span>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+            <span class="qty-display" id="qty-${item.id}">${qty}</span>
+            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+          </div>
+          <button class="add-btn ${inCart ? 'added' : ''}" id="addbtn-${item.id}" onclick="addToCart(${item.id})">
+            ${inCart ? '✓ Added' : 'Add'}
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function filterMenu(category, btn) {
+    currentCategory = category;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderMenu(category);
+  }
+
+  function changeQty(id, delta) {
+    quantities[id] = Math.max(1, (quantities[id] || 1) + delta);
+    document.getElementById(`qty-${id}`).textContent = quantities[id];
+  }
+
+  function addToCart(id) {
+    const qty = quantities[id] || 1;
+    const existingItem = cart.find(i => i.id === id);
+    if (existingItem) {
+      existingItem.quantity = qty;
+    } else {
+      const item = MENU_ITEMS.find(i => i.id === id);
+      cart.push({ ...item, quantity: qty });
+    }
+    updateCartUI();
+    renderMenu(currentCategory);
+  }
+
+  function removeFromCart(id) {
+    cart = cart.filter(i => i.id !== id);
+    quantities[id] = 1;
+    updateCartUI();
+    renderMenu(currentCategory);
+  }
+
+  function updateQtyInCart(id, delta) {
+    const item = cart.find(i => i.id === id);
+    if (item) {
+      item.quantity = Math.max(1, item.quantity + delta);
+      updateCartUI();
+    }
+  }
+
+  function updateCartUI() {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document.getElementById('cartCount').textContent = count;
+    const total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
+
+    const container = document.getElementById('drawerItems');
+    if (cart.length === 0) {
+      container.innerHTML = `<div class="empty-cart"><div class="empty-cart-icon">🍽</div>Nothing here yet</div>`;
+    } else {
+      container.innerHTML = cart.map(item => `
+        <div class="cart-item">
+          <div class="cart-item-icon">${ICONS[item.iconKey]}</div>
+          <div class="cart-item-info">
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-price">$${item.price.toFixed(2)} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}</div>
+          </div>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="updateQtyInCart(${item.id}, -1)">−</button>
+            <span class="qty-display">${item.quantity}</span>
+            <button class="qty-btn" onclick="updateQtyInCart(${item.id}, 1)">+</button>
+          </div>
+          <button class="cart-item-remove" onclick="removeFromCart(${item.id})">✕</button>
+        </div>`).join('');
+    }
+  }
+
+  function openCart()  { document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+  function closeCart() { document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+
+  async function placeOrder() {
+    const customerId = document.getElementById('customerId').value.trim();
+    if (!customerId) { showToast('Please enter your Customer ID', 'error'); return; }
+    if (cart.length === 0) { showToast('Your cart is empty', 'error'); return; }
+
+    const total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    const btn = document.getElementById('placeOrderBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>&nbsp;Placing order...';
+
+    try {
+      const res = await fetch(`${API}/orders?customerId=${encodeURIComponent(customerId)}&amount=${total.toFixed(2)}`, { method: 'POST' });
+      const orderId = await res.text();
+
+      if (!res.ok || orderId === 'Failed to create order') {
+        showToast('Could not create order. Please try again.', 'error');
+        return;
+      }
+
+      currentOrderId = orderId;
+      closeCart();
+      showConfirmModal(customerId, total);
+    } catch (e) {
+      showToast('Network error. Is the server running?', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Place Order';
+    }
+  }
+
+  function showConfirmModal(customerId, total) {
+    const items = cart.map(i => `<strong>${i.name}</strong> × ${i.quantity} — $${(i.price * i.quantity).toFixed(2)}`).join('<br/>');
+    document.getElementById('modalSummary').innerHTML = `
+      ${items}<br/><br/>
+      Guest: <strong>${customerId}</strong><br/>
+      Total: <strong>$${total.toFixed(2)}</strong>`;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  async function confirmOrder() {
+    if (!currentOrderId) return;
+    const btn = document.getElementById('btnConfirm');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>&nbsp;Processing...';
+
+    try {
+      const res = await fetch(`${API}/orders/${currentOrderId}/confirm`, { method: 'POST' });
+      const result = await res.text();
+      closeModal();
+      if (result === 'Order approved') {
+        showToast('✓ Order confirmed! See you soon.', 'success');
+        cart = [];
+        currentOrderId = null;
+        updateCartUI();
+        renderMenu(currentCategory);
+      } else {
+        showToast('Payment rejected. Please check your balance.', 'error');
+      }
+    } catch (e) {
+      showToast('Network error. Please try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Confirm';
+    }
+  }
+
+  async function cancelOrder() {
+    if (!currentOrderId) { closeModal(); return; }
+    try { await fetch(`${API}/orders/${currentOrderId}/cancel`, { method: 'POST' }); } catch (e) {}
+    closeModal();
+    showToast('Order cancelled.', '');
+    currentOrderId = null;
+  }
+
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+  let toastTimer;
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  renderMenu('all');
+  updateCartUI();
+</script>
+</body>
+</html>

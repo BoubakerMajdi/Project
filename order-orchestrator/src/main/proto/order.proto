@@ -1,0 +1,66 @@
+﻿syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.project.order";
+option java_outer_classname = "OrderProto";
+
+enum RequestStatus {
+  PENDING_APPROVAL = 0;
+  APPROVED = 1;
+  REJECTED = 2;
+  CANCELED = 3;
+}
+
+message UpdateRequestStatusRequest {
+  string requestId = 1;
+  RequestStatus status = 2;
+}
+
+message UpdateRequestStatusResponse {
+  string requestId = 1;
+  RequestStatus newStatus = 2;
+  bool success = 3;
+}
+
+message CreateRequestRequest {
+  string customerId = 1;
+  string serviceType = 2;
+  string priority = 3;
+  string location = 4;
+  string description = 5;
+  double estimatedCost = 6;
+}
+
+message CreateRequestResponse {
+  string requestId = 1;
+  string customerId = 2;
+  RequestStatus status = 3;
+  bool success = 4;
+  string serviceType = 5;
+  string priority = 6;
+  string location = 7;
+  string description = 8;
+  double estimatedCost = 9;
+}
+
+message GetRequestRequest {
+  string requestId = 1;
+}
+
+message GetRequestResponse {
+  string requestId = 1;
+  string customerId = 2;
+  RequestStatus status = 3;
+  bool success = 4;
+  string serviceType = 5;
+  string priority = 6;
+  string location = 7;
+  string description = 8;
+  double estimatedCost = 9;
+}
+
+service RequestService {
+  rpc UpdateRequestStatus(UpdateRequestStatusRequest) returns (UpdateRequestStatusResponse);
+  rpc CreateRequest(CreateRequestRequest) returns (CreateRequestResponse);
+  rpc GetRequest(GetRequestRequest) returns (GetRequestResponse);
+}
